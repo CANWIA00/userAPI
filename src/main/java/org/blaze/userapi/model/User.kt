@@ -24,7 +24,7 @@ class User(
     @JoinColumn(name = "profile_id", referencedColumnName = "id")
     private var profile: Profile? = null,
 
-    @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     private val userSession: MutableList<UserSession> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -43,6 +43,7 @@ class User(
     private val role: Role
 ) : UserDetails {
 
+
     constructor() : this(
         id = null,
         email = "",
@@ -51,6 +52,8 @@ class User(
         profile = null,
         role = Role.USER
     )
+
+
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> =
         mutableListOf(SimpleGrantedAuthority("ROLE_${role.name}"))
