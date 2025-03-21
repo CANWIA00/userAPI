@@ -2,11 +2,10 @@ package org.blaze.userapi.model
 
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.util.*
 
 @Entity
 @Table(name = "friends")
-class Friend(
+data class Friend(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private val id: Long? = null,
@@ -23,11 +22,5 @@ class Friend(
 
     private val createTime: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor() : this(
-        id = null,
-        user = User(),
-        friend = User(),
-        status = F_status.PENDING,
-        createTime = LocalDateTime.now()
-    )
+
 }

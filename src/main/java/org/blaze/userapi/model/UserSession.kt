@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-class UserSession (
+data class UserSession (
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,11 +19,5 @@ class UserSession (
 
     private val ipAddress: String,
 
-    private val createTime: LocalDateTime = LocalDateTime.now(),
-
-    ) {
-
-    constructor() : this(
-        id = null, user = User() , device = "", ipAddress = "", createTime = LocalDateTime.now()
+    private val createTime: LocalDateTime = LocalDateTime.now()
     )
-}

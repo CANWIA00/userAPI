@@ -7,17 +7,16 @@ import java.time.LocalDate
 import java.util.*
 
 @Entity
-class Profile(
+data class Profile(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private val id: UUID? = null,
 
-    @OneToOne(mappedBy = "profile")
-    private var user: User? = null,
+    @OneToOne(cascade = [(CascadeType.ALL)],fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    private var user: User,
 
-    private val name: String,
-
-    private val surname: String,
+    private val fullName: String,
 
     private val profilePhoto: String? = "",
 
@@ -30,16 +29,7 @@ class Profile(
     private val lastSeen: Timestamp
 ) {
 
-    constructor() : this(
-        id = null,
-        name = "",
-        surname = "",
-        profilePhoto = "",
-        bio = "",
-        birthDate = LocalDate.now(),
-        userStatus = Status.OFFLINE,
-        lastSeen = Timestamp.from(Instant.now())
-    )
+
 }
 
 

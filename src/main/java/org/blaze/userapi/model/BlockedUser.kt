@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-class BlockedUser(
+data class BlockedUser(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private val id: UUID? = null,
@@ -20,10 +20,5 @@ class BlockedUser(
 
     val blockedAt: LocalDateTime = LocalDateTime.now(),
 ) {
-    constructor() : this(
-        id = null,
-        user = User(),
-        blockedUser = User(),
-        blockedAt = LocalDateTime.now()
-    )
+
 }

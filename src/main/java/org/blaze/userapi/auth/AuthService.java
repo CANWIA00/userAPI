@@ -3,6 +3,8 @@ package org.blaze.userapi.auth;
 import org.blaze.userapi.config.JwtService;
 import org.blaze.userapi.model.*;
 import org.blaze.userapi.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    Logger logger = LoggerFactory.getLogger(LoggerFactory.class);
+
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,32 +40,35 @@ public class AuthService {
                 passwordEncoder.encode(registerRequest.getPassword()),
                 LocalDateTime.now(),
                 null,
-                new ArrayList<UserSession>(null),
-                new ArrayList<Friend>(null),
-                new ArrayList<Friend>(null),
-                new ArrayList<BlockedUser>(null),
-                new ArrayList<BlockedUser>(null),
+                new ArrayList<UserSession>(),
+                new ArrayList<Friend>(),
+                new ArrayList<Friend>(),
+                new ArrayList<BlockedUser>(),
+                new ArrayList<BlockedUser>(),
                 Role.USER
         );
 
         userRepository.save(user);
+        logger.info("User registered successfully!!! :::: " + user);
+
 
         var jwtToken = jwtService.generateToken(user);
         return new AuthResponse(jwtToken);
     }
 
+
     public AuthResponse login(LoginRequest loginRequest) {
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getMail(), loginRequest.getPassword()));
-        var user = userRepository.findByEmail(loginRequest.getMail());
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        var user = userRepository.findByEmail(loginRequest.getEmail());
         if(user == null) {
-            throw new UsernameNotFoundException("User not found! " + loginRequest.getMail());
+            throw new UsernameNotFoundException("User not found! " + loginRequest.getEmail());
         }
 
         if(auth.isAuthenticated()) {
             String token = jwtService.generateToken(user);
             return new AuthResponse(token);
         }else{
-            throw new UsernameNotFoundException("User authentication error! " + loginRequest.getMail());
+            throw new UsernameNotFoundException("User authentication error! " + loginRequest.getEmail());
         }
 
     }
