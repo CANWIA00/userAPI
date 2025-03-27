@@ -1,6 +1,7 @@
 package org.blaze.userapi.auth;
 
 import org.blaze.userapi.config.JwtService;
+import org.blaze.userapi.exception.UserAlreadyExistsException;
 import org.blaze.userapi.model.*;
 import org.blaze.userapi.repository.UserRepository;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,11 @@ public class AuthService {
     }
 
     public AuthResponse register(@RequestBody RegisterRequest registerRequest){
+
+        if(findUserByEmail(registerRequest.getEmail()) != null){
+            throw new UserAlreadyExistsException("User already exists with this email: " + registerRequest.getEmail());
+        }
+
         var user = new User(
                 null,
                 registerRequest.getEmail(),
@@ -41,8 +48,6 @@ public class AuthService {
                 LocalDateTime.now(),
                 null,
                 new ArrayList<UserSession>(),
-                new ArrayList<Friend>(),
-                new ArrayList<Friend>(),
                 new ArrayList<BlockedUser>(),
                 new ArrayList<BlockedUser>(),
                 Role.USER
@@ -58,6 +63,8 @@ public class AuthService {
 
 
     public AuthResponse login(LoginRequest loginRequest) {
+
+
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         var user = userRepository.findByEmail(loginRequest.getEmail());
         if(user == null) {
@@ -71,5 +78,11 @@ public class AuthService {
             throw new UsernameNotFoundException("User authentication error! " + loginRequest.getEmail());
         }
 
+    }
+
+
+
+    protected User findUserByEmail(String mail) {
+        return userRepository.findByEmail(mail);
     }
 }

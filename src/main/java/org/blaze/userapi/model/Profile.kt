@@ -10,25 +10,43 @@ import java.util.*
 data class Profile(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private val id: UUID? = null,
+     val id: UUID? = null,
 
     @OneToOne(cascade = [(CascadeType.ALL)],fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private var user: User,
+     var user: User,
 
-    private val fullName: String,
+     val fullName: String,
 
-    private val profilePhoto: String? = "",
+     val profilePhoto: String? = "",
 
-    private val bio: String? = "",
+     val bio: String? = "",
 
-    private val birthDate: LocalDate,
+     val birthDate: LocalDate,
 
-    private val userStatus: Status,
+     val userStatus: Status, //TODO Online/Offline/default (websocket)
 
-    private val lastSeen: Timestamp
+     val lastSeen: Instant,  //TODO  when he/she were online (websocket)
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    val sender: List<Friend> = mutableListOf(),
+
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    val receiver: List<Friend> = mutableListOf(),
 ) {
 
+    constructor() : this(
+        id = null,
+        profilePhoto = null,
+        user = User(),
+        bio = null,
+        fullName = String(),
+        lastSeen = Instant.now(),
+        birthDate = LocalDate.now(),
+        userStatus = Status.AVAILABLE,
+        sender = mutableListOf(),
+        receiver = mutableListOf()
+    )
 
 }
 

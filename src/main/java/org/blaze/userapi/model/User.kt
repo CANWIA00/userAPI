@@ -28,11 +28,7 @@ data class User(
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
     val userSession: MutableList<UserSession> = mutableListOf(),
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    val friends: List<Friend> = mutableListOf(),
 
-    @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY)
-    val friendOf: List<Friend> = mutableListOf(),
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     val blockedUsers: List<BlockedUser> = mutableListOf(),
@@ -51,8 +47,6 @@ data class User(
         createTime = LocalDateTime.now(),
         profile = null,
         userSession = mutableListOf(),
-        friends = mutableListOf(),
-        friendOf = mutableListOf(),
         blockedUsers = mutableListOf(),
         blockedByUsers = mutableListOf(),
         role = Role.USER

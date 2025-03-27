@@ -7,4 +7,6 @@ import java.util.*
 
 @Repository
 interface ProfileRepository : JpaRepository<Profile, UUID> {
+
+    fun findByUserId(Id: UUID): Profile
 }

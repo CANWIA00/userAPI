@@ -15,5 +15,19 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq-container
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: canwia
+      RABBITMQ_DEFAULT_PASS: canwia
+    ports:
+      - "5672:5672"   # RabbitMQ message broker
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
 volumes:
   mysql_data:
+  rabbitmq_data:

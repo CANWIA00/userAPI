@@ -8,19 +8,19 @@ import java.time.LocalDateTime
 data class Friend(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private val id: Long? = null,
+     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private val user: User,
+    @JoinColumn(name = "sender_id", nullable = false)
+     val sender: Profile,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "friend_id", nullable = false)
-    private val friend: User,
+    @JoinColumn(name = "receiver_id", nullable = false)
+     val receiver: Profile,
 
-    private val status:F_status,
+     val status:F_status,
 
-    private val createTime: LocalDateTime = LocalDateTime.now(),
+     val createTime: LocalDateTime = LocalDateTime.now(),
 ) {
 
 }
