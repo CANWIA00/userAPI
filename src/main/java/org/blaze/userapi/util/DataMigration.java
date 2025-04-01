@@ -2,6 +2,7 @@ package org.blaze.userapi.util;
 
 import jakarta.annotation.PreDestroy;
 import org.blaze.userapi.model.*;
+import org.blaze.userapi.repository.FriendRepository;
 import org.blaze.userapi.repository.ProfileRepository;
 import org.blaze.userapi.repository.UserRepository;
 import org.slf4j.Logger;
@@ -15,7 +16,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
+
 
 @Component
 public class DataMigration implements CommandLineRunner {
@@ -23,11 +24,13 @@ public class DataMigration implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DataMigration.class);
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
+    private final FriendRepository friendRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataMigration(UserRepository userRepository, ProfileRepository profileRepository, PasswordEncoder passwordEncoder) {
+    public DataMigration(UserRepository userRepository, ProfileRepository profileRepository, FriendRepository friendRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
+        this.friendRepository = friendRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -36,6 +39,7 @@ public class DataMigration implements CommandLineRunner {
         log.info("Cleaning up database before shutdown...");
         profileRepository.deleteAll();
         userRepository.deleteAll();
+        friendRepository.deleteAll();
         log.info("Database cleanup complete.");
     }
 
@@ -44,10 +48,12 @@ public class DataMigration implements CommandLineRunner {
     public void run(String... args) {
         log.info("Starting Data Migration...");
 
-        if (userRepository.count() > 0) {
+        if (userRepository.count() > 0 && friendRepository.count() > 0 && profileRepository.count() > 0) {
+            friendRepository.deleteAll();
             log.info("Users already exist, skipping migration.");
             return;
         }
+
 
         try {
             // Create and save users first

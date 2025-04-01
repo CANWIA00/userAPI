@@ -1,19 +1,20 @@
 package org.blaze.userapi.service;
 
 import jakarta.transaction.Transactional;
-import org.blaze.userapi.auth.AuthUtil;
 import org.blaze.userapi.dto.FriendDto;
 import org.blaze.userapi.dto.converter.FriendDtoConverter;
 import org.blaze.userapi.exception.CustomException;
 import org.blaze.userapi.model.F_status;
 import org.blaze.userapi.model.Friend;
 import org.blaze.userapi.model.Profile;
-import org.blaze.userapi.model.User;
 import org.blaze.userapi.repository.FriendRepository;
+import org.blaze.userapi.util.DataMigration;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Service
 public class FriendService {
 
+    private static final Logger log = LoggerFactory.getLogger(FriendService.class);
     private final FriendRepository friendRepository;
     private final ProfileService profileService;
     private final FriendDtoConverter friendDtoConverter;
@@ -38,13 +40,16 @@ public class FriendService {
     }
 
 
-    @Transactional
+
     public FriendDto sendFriendRequest(UUID id) {
 
         Profile sender = profileService.getMyProfile();
         Profile receiver = profileService.getProfileById(id);
 
-        //TODO look at here again { check if they are already friend or not ? }
+        if( receiver == null || sender.equals(receiver)) {
+            throw new CustomException("You have a problem with your sending friend request");
+        }
+
         if(friendRepository.findBySenderAndReceiver(sender, receiver) != null) {
             throw new CustomException("You have already sent a friend request");
         }
@@ -57,9 +62,10 @@ public class FriendService {
                 LocalDateTime.now()
         );
 
+        log.info("Created Friend Object", friend);
         friendRepository.save(friend);
 
-        rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friend);
+        rabbitTemplate.convertAndSend(directExchange.getName(), "firstRoute", friend);
 
         return friendDtoConverter.convertFrom(friend);
     }

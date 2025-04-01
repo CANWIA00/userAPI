@@ -11,11 +11,11 @@ data class Friend(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id")
     val sender: Profile,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "receiver_id")
     val receiver: Profile,
 
@@ -24,5 +24,14 @@ data class Friend(
 
     val createdAt: LocalDateTime
 ) {
+    constructor() : this (
+        id = null,
+        sender = Profile(),
+        receiver = Profile(),
+        status = F_status.PENDING,
+        createdAt = LocalDateTime.now()
+    )
+
+
 
 }

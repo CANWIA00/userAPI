@@ -1,5 +1,6 @@
 package org.blaze.userapi.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import java.sql.Timestamp
 import java.time.Instant
@@ -29,9 +30,11 @@ data class Profile(
      val lastSeen: Instant,  //TODO  when he/she were online (websocket)
 
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
+    @JsonIgnore
     val sender: List<Friend> = mutableListOf(),
 
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    @JsonIgnore
     val receiver: List<Friend> = mutableListOf(),
 ) {
 
@@ -47,6 +50,10 @@ data class Profile(
         sender = mutableListOf(),
         receiver = mutableListOf()
     )
+
+    override fun toString(): String {
+        return "Profile(id=$id, user=$user, fullName='$fullName', profilePhoto=$profilePhoto, bio=$bio, birthDate=$birthDate, userStatus=$userStatus, lastSeen=$lastSeen, sender=$sender, receiver=$receiver)"
+    }
 
 }
 
