@@ -2,25 +2,27 @@ package org.blaze.userapi.model
 
 import jakarta.persistence.*
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Table(name = "friends")
 data class Friend(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-     val id: Long? = null,
+    @GeneratedValue(strategy = GenerationType.UUID)
+    val id: UUID? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-     val sender: Profile,
+    @JoinColumn(name = "sender_id")
+    val sender: Profile,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
-     val receiver: Profile,
+    @JoinColumn(name = "receiver_id")
+    val receiver: Profile,
 
-     val status:F_status,
+    @Enumerated(EnumType.STRING)
+    val status: F_status,
 
-     val createTime: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime
 ) {
 
 }

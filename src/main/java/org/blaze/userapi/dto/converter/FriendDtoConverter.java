@@ -16,7 +16,7 @@ public class FriendDtoConverter {
                 friend.getSender(),
                 friend.getReceiver(),
                 friend.getStatus(),
-                friend.getCreateTime()
+                friend.getCreatedAt()
         );
     }
 

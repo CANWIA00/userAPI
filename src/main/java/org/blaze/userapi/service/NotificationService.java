@@ -10,20 +10,19 @@ public class NotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    public NotificationService( SimpMessagingTemplate messagingTemplate) {
+    public NotificationService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
     @RabbitListener(queues = "sendFriendRequest")
     public void handleFriendRequest(Friend friend) {
-
-        String message = "You have a new friend request from" + friend.getSender();
-
-        messagingTemplate.convertAndSend("/topic/notifications/" + friend.getSender(), message );
-
+        String message = String.format("You have a new friend request from %s", 
+            friend.getSender().getUser().getUsername());
         
-
+        // Send to the receiver's notification channel
+        messagingTemplate.convertAndSend(
+            "/topic/notifications/" + friend.getReceiver().getUser().getId(), 
+            message
+        );
     }
-
-
 }

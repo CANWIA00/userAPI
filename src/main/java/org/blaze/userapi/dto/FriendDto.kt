@@ -6,11 +6,9 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class FriendDto(
-
-    val id: Long,
-    val sender:Profile,
-    val receiver:Profile,
-    val status:F_status,
-    val createdAt: LocalDateTime,
-
-    )
+    val id: UUID?,
+    val senderId: Profile,
+    val receiverId: Profile,
+    val status: F_status,
+    val createdAt: LocalDateTime
+)

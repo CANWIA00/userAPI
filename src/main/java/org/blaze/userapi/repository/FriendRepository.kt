@@ -5,10 +5,11 @@ import org.blaze.userapi.model.Friend
 import org.blaze.userapi.model.Profile
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
-interface FriendRepository : JpaRepository<Friend, Long> {
+interface FriendRepository : JpaRepository<Friend, UUID> {
 
-    fun findBySenderAndReceiver(user:Profile,friend: Profile):Friend?
+    fun findBySenderAndReceiver(sender: Profile, receiver: Profile): Friend?
     fun findByReceiverAndStatus(friend:Profile,status: F_status):Friend?
 }

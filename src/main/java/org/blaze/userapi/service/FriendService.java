@@ -59,7 +59,7 @@ public class FriendService {
 
         friendRepository.save(friend);
 
-        rabbitTemplate.convertAndSend(directExchange.getName(),"sendFriendRequest",friend);
+        rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friend);
 
         return friendDtoConverter.convertFrom(friend);
     }
