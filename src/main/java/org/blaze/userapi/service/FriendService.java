@@ -40,18 +40,17 @@ public class FriendService {
     }
 
 
-
+    @Transactional
     public FriendDto sendFriendRequest(UUID id) {
-
         Profile sender = profileService.getMyProfile();
         Profile receiver = profileService.getProfileById(id);
 
-        if( receiver == null || sender.equals(receiver)) {
-            throw new CustomException("You have a problem with your sending friend request");
+        if (receiver == null || sender.equals(receiver)) {
+            throw new CustomException("Invalid friend request");
         }
 
-        if(friendRepository.findBySenderAndReceiver(sender, receiver) != null) {
-            throw new CustomException("You have already sent a friend request");
+        if (friendRepository.findBySenderAndReceiver(sender, receiver) != null) {
+            throw new CustomException("Friend request already sent");
         }
 
         Friend friend = new Friend(
@@ -62,11 +61,21 @@ public class FriendService {
                 LocalDateTime.now()
         );
 
-        log.info("Created Friend Object", friend);
         friendRepository.save(friend);
+        FriendDto friendDto = friendDtoConverter.convertFrom(friend);
 
-        rabbitTemplate.convertAndSend(directExchange.getName(), "firstRoute", friend);
+        log.info("*** Sender **** : " + sender.getId() + " / Receiver **** : " + receiver.getId());
+        log.info("Attempting to send friend request message to RabbitMQ...");
 
-        return friendDtoConverter.convertFrom(friend);
+        try {
+            rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friendDto);
+            log.info("Sent friend request message to RabbitMQ with receiver ID: {}", friend.getReceiver().getId());
+        } catch (Exception e) {
+            log.error("Failed to send friend request message to RabbitMQ: {}", e.getMessage(), e);
+        }
+
+        return friendDto;
     }
+
+
 }

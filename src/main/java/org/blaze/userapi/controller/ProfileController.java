@@ -7,11 +7,11 @@ import org.blaze.userapi.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/profile")
+@CrossOrigin
 public class ProfileController {
 
     private final ProfileService profileService;
@@ -30,7 +30,7 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.findProfileById(id));
     }
 
-    @GetMapping("/myProfile")
+    @GetMapping()
     public ResponseEntity<ProfileDto> getProfileByUserId(){
         return ResponseEntity.ok(profileService.findProfileByUserId());
     }

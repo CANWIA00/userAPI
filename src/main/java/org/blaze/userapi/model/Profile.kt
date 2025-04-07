@@ -15,6 +15,7 @@ data class Profile(
 
     @OneToOne(cascade = [(CascadeType.ALL)],fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore
      var user: User,
 
      val fullName: String,
@@ -51,9 +52,6 @@ data class Profile(
         receiver = mutableListOf()
     )
 
-    override fun toString(): String {
-        return "Profile(id=$id, user=$user, fullName='$fullName', profilePhoto=$profilePhoto, bio=$bio, birthDate=$birthDate, userStatus=$userStatus, lastSeen=$lastSeen, sender=$sender, receiver=$receiver)"
-    }
 
 }
 
