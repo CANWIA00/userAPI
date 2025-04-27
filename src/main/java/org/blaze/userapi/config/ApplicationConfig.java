@@ -24,7 +24,6 @@ public class ApplicationConfig {
     }
 
 
-    //TODO it may be cause an error!
     @Bean
     public UserDetailsService getUserDetailsService() {
         return email -> {

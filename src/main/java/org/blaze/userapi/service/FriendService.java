@@ -3,12 +3,12 @@ package org.blaze.userapi.service;
 import jakarta.transaction.Transactional;
 import org.blaze.userapi.dto.FriendDto;
 import org.blaze.userapi.dto.converter.FriendDtoConverter;
+import org.blaze.userapi.dto.message.FriendshipDtoMessage;
 import org.blaze.userapi.exception.CustomException;
 import org.blaze.userapi.model.F_status;
 import org.blaze.userapi.model.Friend;
 import org.blaze.userapi.model.Profile;
 import org.blaze.userapi.repository.FriendRepository;
-import org.blaze.userapi.util.DataMigration;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -61,21 +61,38 @@ public class FriendService {
                 LocalDateTime.now()
         );
 
-        friendRepository.save(friend);
+       Friend friendShip =  friendRepository.save(friend);
         FriendDto friendDto = friendDtoConverter.convertFrom(friend);
 
         log.info("*** Sender **** : " + sender.getId() + " / Receiver **** : " + receiver.getId());
         log.info("Attempting to send friend request message to RabbitMQ...");
+        log.info("Saved friend ID: {}", friendShip.getId());
+
+        FriendshipDtoMessage friendDtoMessage = new FriendshipDtoMessage();
+        friendDtoMessage.setMessage("You have new friend request");
+        friendDtoMessage.setFriendId(friendShip.getId());
+        
+        log.info("Created message with ID: {}", friendDtoMessage.getId());
+        log.info("Set friendId in message: {}", friendDtoMessage.getFriendId());
+        log.info("Full message content: {}", friendDtoMessage);
 
         try {
-            rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friendDto);
-            log.info("Sent friend request message to RabbitMQ with receiver ID: {}", friend.getReceiver().getId());
+            rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friendDtoMessage);
+            log.info("Successfully sent message to RabbitMQ");
         } catch (Exception e) {
             log.error("Failed to send friend request message to RabbitMQ: {}", e.getMessage(), e);
+            throw e;
         }
 
         return friendDto;
     }
 
+
+    protected Friend getFriend(UUID id) {
+        if (id == null) {
+            throw new CustomException("Friend ID must not be null");
+        }
+        return friendRepository.findById(id).orElseThrow(() -> new CustomException("Friendship not found with id : " + id));
+    }
 
 }
