@@ -7,6 +7,7 @@ import org.blaze.userapi.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,11 +31,18 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.findProfileById(id));
     }
 
+/*
+    @GetMapping("/search/{username}")
+    public ResponseEntity<List<ProfileDto>> searchProfile(@RequestParam String username){
+        return ResponseEntity.ok(List.of(new ProfileDto()));
+    }
+*/
+    // my profile
     @GetMapping()
     public ResponseEntity<ProfileDto> getProfileByUserId(){
         return ResponseEntity.ok(profileService.findProfileByUserId());
     }
 
-    //TODO update profile endpoints
+
 
 }
