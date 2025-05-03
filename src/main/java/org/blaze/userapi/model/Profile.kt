@@ -2,6 +2,7 @@ package org.blaze.userapi.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
+import java.io.Serializable
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
@@ -11,24 +12,24 @@ import java.util.*
 data class Profile(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-     val id: UUID? = null,
+    val id: UUID? = null,
 
-    @OneToOne(cascade = [(CascadeType.ALL)],fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore
-     var user: User,
+    var user: User? = null,
 
-     val fullName: String,
+    val fullName: String? = null,
 
-     val profilePhoto: String? = "",
+    val profilePhoto: String? = null,
 
-     val bio: String? = "",
+    val bio: String? = null,
 
-     val birthDate: LocalDate,
+    val birthDate: LocalDate = LocalDate.now(),
 
-     val userStatus: Status, //TODO Online/Offline/default (websocket)
+    val userStatus: Status = Status.AVAILABLE,
 
-     val lastSeen: Instant,  //TODO  when he/she were online (websocket)
+    val lastSeen: Instant = Instant.now(),
 
     @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY)
     @JsonIgnore
@@ -36,23 +37,21 @@ data class Profile(
 
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
     @JsonIgnore
-    val receiver: List<Friend> = mutableListOf(),
-) {
-
+    val receiver: List<Friend> = mutableListOf()
+): Serializable {
     constructor() : this(
         id = null,
+        user = null,
+        fullName = null,
         profilePhoto = null,
-        user = User(),
         bio = null,
-        fullName = String(),
-        lastSeen = Instant.now(),
         birthDate = LocalDate.now(),
         userStatus = Status.AVAILABLE,
+        lastSeen = Instant.now(),
         sender = mutableListOf(),
         receiver = mutableListOf()
     )
-
-
 }
+
 
 

@@ -3,20 +3,20 @@ package org.blaze.userapi.service;
 import jakarta.transaction.Transactional;
 import org.blaze.userapi.dto.FriendDto;
 import org.blaze.userapi.dto.converter.FriendDtoConverter;
-import org.blaze.userapi.dto.message.FriendshipDtoMessage;
+import org.blaze.userapi.dto.message.FriendshipMessageDto;
 import org.blaze.userapi.exception.CustomException;
 import org.blaze.userapi.model.F_status;
 import org.blaze.userapi.model.Friend;
 import org.blaze.userapi.model.Profile;
 import org.blaze.userapi.repository.FriendRepository;
-import org.springframework.amqp.core.AmqpTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -28,15 +28,13 @@ public class FriendService {
     private final FriendDtoConverter friendDtoConverter;
     private final RabbitTemplate rabbitTemplate;
     private final DirectExchange directExchange;
-    private final AmqpTemplate amqpTemplate;
 
-    public FriendService(FriendRepository friendRepository, ProfileService profileService, FriendDtoConverter friendDtoConverter, RabbitTemplate rabbitTemplate, DirectExchange directExchange, AmqpTemplate amqpTemplate) {
+    public FriendService(FriendRepository friendRepository, ProfileService profileService, FriendDtoConverter friendDtoConverter, RabbitTemplate rabbitTemplate, DirectExchange directExchange) {
         this.friendRepository = friendRepository;
         this.profileService = profileService;
         this.friendDtoConverter = friendDtoConverter;
         this.rabbitTemplate = rabbitTemplate;
         this.directExchange = directExchange;
-        this.amqpTemplate = amqpTemplate;
     }
 
 
@@ -61,23 +59,18 @@ public class FriendService {
                 LocalDateTime.now()
         );
 
-       Friend friendShip =  friendRepository.save(friend);
+        Friend friendShip =  friendRepository.save(friend);
         FriendDto friendDto = friendDtoConverter.convertFrom(friend);
 
-        log.info("*** Sender **** : " + sender.getId() + " / Receiver **** : " + receiver.getId());
-        log.info("Attempting to send friend request message to RabbitMQ...");
-        log.info("Saved friend ID: {}", friendShip.getId());
+        FriendshipMessageDto messageDto = new FriendshipMessageDto();
+        messageDto.setFriendId(friendShip.getId());
+        messageDto.setReceiverEmail(Objects.requireNonNull(Objects.requireNonNull(friendShip.getReceiver()).getUser()).getEmail());
+        messageDto.setSenderEmail(Objects.requireNonNull(Objects.requireNonNull(friendShip.getSender()).getUser()).getEmail());
+        messageDto.setMessage("You received a friend request from : " + friendShip.getSender().getUser().getEmail() );
 
-        FriendshipDtoMessage friendDtoMessage = new FriendshipDtoMessage();
-        friendDtoMessage.setMessage("You have new friend request");
-        friendDtoMessage.setFriendId(friendShip.getId());
-        
-        log.info("Created message with ID: {}", friendDtoMessage.getId());
-        log.info("Set friendId in message: {}", friendDtoMessage.getFriendId());
-        log.info("Full message content: {}", friendDtoMessage);
 
         try {
-            rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", friendDtoMessage);
+            rabbitTemplate.convertAndSend(directExchange.getName(), "friendship.request", messageDto);
             log.info("Successfully sent message to RabbitMQ");
         } catch (Exception e) {
             log.error("Failed to send friend request message to RabbitMQ: {}", e.getMessage(), e);
@@ -89,9 +82,6 @@ public class FriendService {
 
 
     protected Friend getFriend(UUID id) {
-        if (id == null) {
-            throw new CustomException("Friend ID must not be null");
-        }
         return friendRepository.findById(id).orElseThrow(() -> new CustomException("Friendship not found with id : " + id));
     }
 

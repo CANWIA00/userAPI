@@ -8,35 +8,38 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-@Table(name = "friends")
+@Table(name = "friend")
 data class Friend(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     @JsonIgnore
-    val sender: Profile,
+    val sender: Profile? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     @JsonIgnore
-    val receiver: Profile,
+    val receiver: Profile? = null,
 
     @Enumerated(EnumType.STRING)
-    val status: F_status,
+    val status: F_status = F_status.PENDING,
 
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime = LocalDateTime.now()
 ) : Serializable{
-    constructor() : this (
+
+    constructor() : this(
         id = null,
-        sender = Profile(),
-        receiver = Profile(),
+        sender = null,
+        receiver = null,
         status = F_status.PENDING,
         createdAt = LocalDateTime.now()
     )
-
-
-
 }
+
+
+
+
+

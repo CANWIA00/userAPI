@@ -5,19 +5,34 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-data class UserSession (
+@Table(name = "user_sessions")
+class UserSession {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private val id: UUID? = null,
+    var id: UUID? = null
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @JoinColumn(name = "user_id", nullable = false)
-    private val user: User,
+    lateinit var user: User
 
-    private val device: String,
+    var device: String = ""
 
-    private val ipAddress: String,
+    var ipAddress: String = ""
 
-    private val createTime: LocalDateTime = LocalDateTime.now()
-    )
+    var createTime: LocalDateTime = LocalDateTime.now()
+
+    constructor()
+
+    constructor(
+        user: User,
+        device: String,
+        ipAddress: String,
+        createTime: LocalDateTime = LocalDateTime.now()
+    ) {
+        this.user = user
+        this.device = device
+        this.ipAddress = ipAddress
+        this.createTime = createTime
+    }
+}

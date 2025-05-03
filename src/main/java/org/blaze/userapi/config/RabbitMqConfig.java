@@ -9,10 +9,9 @@ import org.springframework.context.annotation.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import jakarta.annotation.PostConstruct;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -20,29 +19,31 @@ import java.util.UUID;
 @Configuration
 public class RabbitMqConfig {
     private static final Logger log = LoggerFactory.getLogger(RabbitMqConfig.class);
-    private static final String EXCHANGE_NAME = "friendship.direct";
-    private static final String QUEUE_NAME = "sendFriendRequestQueue";
-    private static final String ROUTING_KEY = "friendship.request";
+
+    public static final String EXCHANGE_NAME = "friendship.direct";
+    public static final String FRIEND_REQUEST_QUEUE = "sendFriendRequestQueue";
+    public static final String FRIEND_REQUEST_ROUTING_KEY = "friendship.request";
+
+    // Test queue
+    public static final String TEST_QUEUE = "testQueue";
+    public static final String TEST_ROUTING_KEY = "friendship.test";
 
     @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    private RabbitTemplate rabbitTemplate;
 
-    // Connection Test
     @EventListener(ContextRefreshedEvent.class)
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        // This will run after all beans are initialized
-        RabbitTemplate rabbitTemplate = event.getApplicationContext().getBean(RabbitTemplate.class);
         try {
             log.info("Testing RabbitMQ connection...");
-            
-            // Create a simple test message that won't cause deserialization issues
+
+            // Use a safe, isolated test queue
             Map<String, Object> testMessage = new HashMap<>();
             testMessage.put("type", "test");
             testMessage.put("content", "RabbitMQ connection test");
             testMessage.put("id", UUID.randomUUID().toString());
-            
-            rabbitTemplate.convertAndSend(EXCHANGE_NAME, ROUTING_KEY, testMessage);
-            log.info("Successfully sent test message to RabbitMQ with ID: {}", testMessage.get("id"));
+
+            rabbitTemplate.convertAndSend(EXCHANGE_NAME, TEST_ROUTING_KEY, testMessage);
+            log.info("Successfully sent test message to RabbitMQ testQueue");
         } catch (Exception e) {
             log.error("Failed to connect to RabbitMQ: {}", e.getMessage(), e);
         }
@@ -55,14 +56,26 @@ public class RabbitMqConfig {
 
     @Bean
     public Queue friendRequestQueue() {
-        return new Queue(QUEUE_NAME, false);
+        return new Queue(FRIEND_REQUEST_QUEUE, false); // durable queue
     }
 
     @Bean
-    public Binding binding(Queue friendRequestQueue, DirectExchange directExchange) {
-        return BindingBuilder.bind(friendRequestQueue)
-                .to(directExchange)
-                .with(ROUTING_KEY);
+    public Queue testQueue() {
+        return new Queue(TEST_QUEUE, false);
+    }
+
+    @Bean
+    public Binding friendRequestBinding() {
+        return BindingBuilder.bind(friendRequestQueue())
+                .to(directExchange())
+                .with(FRIEND_REQUEST_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding testQueueBinding() {
+        return BindingBuilder.bind(testQueue())
+                .to(directExchange())
+                .with(TEST_ROUTING_KEY);
     }
 
     @Bean
