@@ -16,6 +16,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -80,6 +81,10 @@ public class FriendService {
         return friendDto;
     }
 
+    public List<FriendDto> getPendingFriendRequests() {
+        Profile profile = profileService.getMyProfile();
+        return friendDtoConverter.convertFrom(friendRepository.findByReceiverAndStatus(profile, F_status.PENDING));
+    }
 
     protected Friend getFriend(UUID id) {
         return friendRepository.findById(id).orElseThrow(() -> new CustomException("Friendship not found with id : " + id));

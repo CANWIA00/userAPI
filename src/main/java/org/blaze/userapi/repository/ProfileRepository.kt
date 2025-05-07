@@ -9,4 +9,7 @@ import java.util.*
 interface ProfileRepository : JpaRepository<Profile, UUID> {
 
     fun findByUserId(Id: UUID): Profile
+
+    fun findByFullNameStartingWithIgnoreCase(fullName: String?): List<Profile?>?
+
 }

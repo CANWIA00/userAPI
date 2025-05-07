@@ -5,6 +5,7 @@ import org.blaze.userapi.service.FriendService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,5 +24,9 @@ public class FriendController {
         return ResponseEntity.ok(friendService.sendFriendRequest(id));
     }
 
+    @GetMapping("/pending")
+    public ResponseEntity<List<FriendDto>> getPendingFriends() {
+        return ResponseEntity.ok(friendService.getPendingFriendRequests());
+    }
 
 }

@@ -11,5 +11,5 @@ import java.util.*
 interface FriendRepository : JpaRepository<Friend, UUID> {
 
     fun findBySenderAndReceiver(sender: Profile, receiver: Profile): Friend?
-    fun findByReceiverAndStatus(friend:Profile,status: F_status):Friend?
+    fun findByReceiverAndStatus(friend:Profile,status: F_status):List<Friend>?
 }

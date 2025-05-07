@@ -31,12 +31,12 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.findProfileById(id));
     }
 
-/*
-    @GetMapping("/search/{username}")
-    public ResponseEntity<List<ProfileDto>> searchProfile(@RequestParam String username){
-        return ResponseEntity.ok(List.of(new ProfileDto()));
+
+    @GetMapping("/search/{fullName}")
+    public ResponseEntity<List<ProfileDto>> searchProfile(@PathVariable String fullName){
+        return ResponseEntity.ok(profileService.searchProfile(fullName));
     }
-*/
+
     // my profile
     @GetMapping()
     public ResponseEntity<ProfileDto> getProfileByUserId(){

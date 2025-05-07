@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -51,6 +52,15 @@ public class ProfileService {
 
         return profileDtoConverter.convertFrom(profileRepository.save(profile));
 
+    }
+
+    public List<ProfileDto> searchProfile(String username) {
+        List<Profile> profileList = profileRepository.findByFullNameStartingWithIgnoreCase(username);
+        assert profileList != null;
+        if(profileList.isEmpty()){
+            throw new EntityNotFoundException("Profile not found");
+        }
+        return profileDtoConverter.convertFrom(profileList);
     }
 
     public ProfileDto findProfileById(UUID id) {
