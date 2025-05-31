@@ -25,7 +25,7 @@ data class Friend(
     val receiver: Profile? = null,
 
     @Enumerated(EnumType.STRING)
-    val status: F_status = F_status.PENDING,
+    var status: F_status = F_status.PENDING,
 
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) : Serializable{

@@ -2,6 +2,7 @@ package org.blaze.userapi.service;
 
 import jakarta.transaction.Transactional;
 import org.blaze.userapi.dto.FriendDto;
+import org.blaze.userapi.dto.ProfileDto;
 import org.blaze.userapi.dto.converter.FriendDtoConverter;
 import org.blaze.userapi.dto.message.FriendshipMessageDto;
 import org.blaze.userapi.exception.CustomException;
@@ -9,6 +10,7 @@ import org.blaze.userapi.model.F_status;
 import org.blaze.userapi.model.Friend;
 import org.blaze.userapi.model.Profile;
 import org.blaze.userapi.repository.FriendRepository;
+import org.blaze.userapi.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.DirectExchange;
@@ -16,9 +18,11 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class FriendService {
@@ -29,13 +33,15 @@ public class FriendService {
     private final FriendDtoConverter friendDtoConverter;
     private final RabbitTemplate rabbitTemplate;
     private final DirectExchange directExchange;
+    private final UserRepository userRepository;
 
-    public FriendService(FriendRepository friendRepository, ProfileService profileService, FriendDtoConverter friendDtoConverter, RabbitTemplate rabbitTemplate, DirectExchange directExchange) {
+    public FriendService(FriendRepository friendRepository, ProfileService profileService, FriendDtoConverter friendDtoConverter, RabbitTemplate rabbitTemplate, DirectExchange directExchange, UserRepository userRepository) {
         this.friendRepository = friendRepository;
         this.profileService = profileService;
         this.friendDtoConverter = friendDtoConverter;
         this.rabbitTemplate = rabbitTemplate;
         this.directExchange = directExchange;
+        this.userRepository = userRepository;
     }
 
 
@@ -44,7 +50,9 @@ public class FriendService {
         Profile sender = profileService.getMyProfile();
         Profile receiver = profileService.getProfileById(id);
 
+        log.info("Sending friend request to " + id);
         if (receiver == null || sender.equals(receiver)) {
+            log.info("Receiver null or sender and receiver are same person!");
             throw new CustomException("Invalid friend request");
         }
 
@@ -83,11 +91,59 @@ public class FriendService {
 
     public List<FriendDto> getPendingFriendRequests() {
         Profile profile = profileService.getMyProfile();
-        return friendDtoConverter.convertFrom(friendRepository.findByReceiverAndStatus(profile, F_status.PENDING));
+        return friendDtoConverter.convertFrom(Objects.requireNonNull(friendRepository.findByReceiverAndStatus(profile, F_status.PENDING)));
     }
+
+    public List<ProfileDto> getAllFriend() {
+        Profile profile = profileService.getMyProfile();
+        List<ProfileDto> allFriendsProfileList = new ArrayList<>();
+        List<Friend> receiverAcceptedRequests = friendRepository.findByReceiverAndStatus(profile, F_status.ACCEPTED);
+        List<Friend> senderAcceptedRequests = friendRepository.findBySenderAndStatus(profile, F_status.ACCEPTED);
+        if(receiverAcceptedRequests != null) {
+            List<ProfileDto> friendsFromReceiver = receiverAcceptedRequests.stream()
+                    .map(friend -> profileService.findProfileById(friend.getSender().getId()))
+                    .toList();
+            allFriendsProfileList.addAll(friendsFromReceiver);
+        }
+
+        if (senderAcceptedRequests != null) {
+            List<ProfileDto> friendsFromSender = senderAcceptedRequests.stream()
+                    .map(friend -> profileService.findProfileById(friend.getReceiver().getId()))
+                    .toList();
+            allFriendsProfileList.addAll(friendsFromSender);
+        }
+
+        return allFriendsProfileList;
+
+
+    }
+
+
+
+    public String acceptFriendRequest(UUID id) {
+        Friend friend = friendRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Friend request not found with id: " + id));
+
+        friend.setStatus(F_status.ACCEPTED);
+        friendRepository.save(friend);
+
+        return "Friend request accepted successfully";
+    }
+
+    public String rejectFriendRequest(UUID id) {
+        Friend friend = friendRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Friend request not found with id: " + id));
+        friend.setStatus(F_status.REJECTED);
+        friendRepository.save(friend);
+
+        return "Friend request rejected successfully";
+    }
+
 
     protected Friend getFriend(UUID id) {
         return friendRepository.findById(id).orElseThrow(() -> new CustomException("Friendship not found with id : " + id));
     }
+
+
 
 }
