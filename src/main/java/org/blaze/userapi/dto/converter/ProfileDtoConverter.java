@@ -14,7 +14,8 @@ public class ProfileDtoConverter {
     public ProfileDto convertFrom (Profile profile) {
         return new ProfileDto(
                 Objects.requireNonNull(profile.getId()),
-                profile.getFullName(),
+                Objects.requireNonNull(profile.getFullName()),
+                Objects.requireNonNull(Objects.requireNonNull(profile.getUser()).getEmail()),
                 Objects.requireNonNull(profile.getUser().getId()),
                 profile.getProfilePhoto(),
                 profile.getBio(),

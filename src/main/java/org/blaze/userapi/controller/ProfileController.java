@@ -7,6 +7,7 @@ import org.blaze.userapi.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +43,8 @@ public class ProfileController {
     public ResponseEntity<ProfileDto> getProfileByUserId(){
         return ResponseEntity.ok(profileService.findProfileByUserId());
     }
+
+
 
 
 

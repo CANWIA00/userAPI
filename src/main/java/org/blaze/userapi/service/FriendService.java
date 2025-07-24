@@ -113,6 +113,8 @@ public class FriendService {
             allFriendsProfileList.addAll(friendsFromSender);
         }
 
+        allFriendsProfileList.forEach(System.out::println);
+
         return allFriendsProfileList;
 
 

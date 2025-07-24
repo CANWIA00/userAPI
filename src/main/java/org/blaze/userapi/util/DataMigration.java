@@ -72,6 +72,9 @@ public class DataMigration implements CommandLineRunner {
             profile1 = profileRepository.save(profile1);
             profile2 = profileRepository.save(profile2);
 
+            Friend exampleFriend = new Friend(null,profile1,profile2,F_status.ACCEPTED,LocalDateTime.now());
+            friendRepository.save(exampleFriend);
+
             log.info("Data Migration Processed Successfully!");
             log.info("Inserted Users: {}", userRepository.findAll());
             log.info("Inserted Profiles: {}", profileRepository.findAll());
@@ -82,6 +85,7 @@ public class DataMigration implements CommandLineRunner {
 
         userRepository.findAll().forEach(System.out::println);
         profileRepository.findAll().forEach(System.out::println);
+
 
     }
 
@@ -113,4 +117,6 @@ public class DataMigration implements CommandLineRunner {
                 List.of()
         );
     }
+
+
 }

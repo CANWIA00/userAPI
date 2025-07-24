@@ -12,6 +12,7 @@ import org.blaze.userapi.model.User;
 import org.blaze.userapi.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -71,6 +72,12 @@ public class ProfileService {
         return profileDtoConverter.convertFrom(getMyProfile());
     }
 
+    public ProfileDto findMeByPrincipal(Principal principal) {
+        String userEmail = principal.getName();
+        Profile profile = getProfileByUserMail(userEmail);
+        return profileDtoConverter.convertFrom(profile);
+    }
+
 
     ///************ Helper Methods to use also in the other classes *************//
     protected Profile getMyProfile() {
@@ -81,4 +88,10 @@ public class ProfileService {
     protected Profile getProfileById(UUID id) {
         return profileRepository.findById(id).orElseThrow(() -> new CustomException("Profile not found exception with id : "+id));
     }
+
+    protected Profile getProfileByUserMail(String username) {
+        return profileRepository.findProfileByUserEmail(username);
+    }
+
+
 }

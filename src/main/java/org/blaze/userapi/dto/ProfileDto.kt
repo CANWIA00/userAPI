@@ -13,6 +13,8 @@ data class ProfileDto(
 
      val fullName: String,
 
+     val userMail: String,
+
      val userId: UUID,
 
      val profilePhoto: String? = "",

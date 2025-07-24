@@ -1,7 +1,7 @@
 package org.blaze.userapi.service;
 
-import org.blaze.userapi.auth.AuthService;
 import org.blaze.userapi.auth.AuthUtil;
+import org.blaze.userapi.config.JwtService;
 import org.blaze.userapi.exception.CustomException;
 import org.blaze.userapi.model.User;
 import org.blaze.userapi.repository.UserRepository;
@@ -14,9 +14,11 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
 
@@ -34,5 +36,13 @@ public class UserService {
 
     protected User getUserByToken(){
         return findUser(AuthUtil.getUsernameByToken());
+    }
+
+    protected String getUserFromToken(String token){
+        return jwtService.extractUsername(token);
+    }
+
+    public User findUserByProfileId(UUID id){
+        return userRepository.findUserByProfileId(id);
     }
 }
