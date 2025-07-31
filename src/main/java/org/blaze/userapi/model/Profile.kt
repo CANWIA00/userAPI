@@ -21,7 +21,7 @@ data class Profile(
 
     val fullName: String? = null,
 
-    val profilePhoto: String? = null,
+    val profilePhoto: String? = "",
 
     val bio: String? = null,
 

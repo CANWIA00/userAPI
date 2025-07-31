@@ -3,6 +3,7 @@ package org.blaze.userapi.controller;
 import io.jsonwebtoken.io.IOException;
 import org.blaze.userapi.dto.message.ChatProfileInfoDto;
 import org.blaze.userapi.dto.message.MessageDto;
+import org.blaze.userapi.dto.request.SignalMessageRequest;
 import org.blaze.userapi.service.ChatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,10 @@ public class ChatController {
         }
     }
 
-
+    @MessageMapping("/call")
+    public void callUser(@Payload SignalMessageRequest messageDto, Principal principal) {
+        System.out.println("callUser: " + messageDto);
+       chatService.callUser(messageDto,principal);
+    }
 
 }

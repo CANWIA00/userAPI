@@ -65,8 +65,8 @@ public class DataMigration implements CommandLineRunner {
             user2 = userRepository.save(user2);
 
             // Create and save profiles with managed user entities
-            Profile profile1 = createProfile(user1, "111_name", "photo", "bio");
-            Profile profile2 = createProfile(user2, "222_name", "photo", "bio");
+            Profile profile1 = createProfile(user1, "111_name", "http://localhost:8080/uploads/profile/d8360382-8916-4248-8fbc-6ed8b7d51f89.jpg", "bio");
+            Profile profile2 = createProfile(user2, "222_name", "", "bio");
             
             // Save profiles
             profile1 = profileRepository.save(profile1);

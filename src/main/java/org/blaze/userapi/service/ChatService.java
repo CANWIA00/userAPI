@@ -4,6 +4,7 @@ import org.blaze.userapi.dto.ProfileDto;
 import org.blaze.userapi.dto.converter.MessageDtoConverter;
 import org.blaze.userapi.dto.message.MessageDto;
 import org.blaze.userapi.dto.message.ChatProfileInfoDto;
+import org.blaze.userapi.dto.request.SignalMessageRequest;
 import org.blaze.userapi.model.Message;
 import org.blaze.userapi.model.MessageType;
 import org.blaze.userapi.model.Profile;
@@ -83,16 +84,16 @@ public class ChatService {
         return new ChatProfileInfoDto(
                 profileDtoSender.getFullName(),
                 profileDtoSender.getUserMail(),
+                Objects.requireNonNull(profileDtoSender.getProfilePhoto()),
                 profileDtoSender.getUserId(),
                 Objects.requireNonNull(profileDtoReceiver.getFullName()),
                 Objects.requireNonNull(profileDtoReceiver.getUser()).getEmail(),
+                Objects.requireNonNull(profileDtoReceiver.getProfilePhoto()),
                 Objects.requireNonNull(profileDtoReceiver.getId())
         );
     }
 
     public Map<String, String> uploadFile(MultipartFile file, String senderMail, String receiverMail) throws IOException {
-        log.info("Uploading file {} to {}", file.getOriginalFilename(), senderMail);
-        log.info("Uploading file {} to {}", file.getOriginalFilename(), receiverMail);
         File uploadDir = new File(UPLOAD_DIR);
         if (!uploadDir.exists()) {
             uploadDir.mkdirs();
@@ -129,4 +130,20 @@ public class ChatService {
         }
         return originalName.substring(originalName.lastIndexOf('.') + 1);
     }
+
+    public void callUser(SignalMessageRequest message, Principal principal) {
+        if (!message.getFrom().equals(principal.getName())) {
+            throw new SecurityException("Invalid sender");
+        }
+        try {
+            messagingTemplate.convertAndSendToUser(
+                    message.getTo(),
+                    "/queue/signal",
+                    message
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
