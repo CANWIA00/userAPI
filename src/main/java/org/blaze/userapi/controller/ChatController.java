@@ -78,8 +78,9 @@ public class ChatController {
 
     @MessageMapping("/call")
     public void callUser(@Payload SignalMessageRequest messageDto, Principal principal) {
-        log.info("🔒 Principal name: {}", principal.getName());
-        log.info("🎯 Message to: {}", messageDto.getTo());
+        System.out.println("🔔 Backend received CALL signal:");
+        System.out.println("👤 Sender (principal): " + principal.getName());
+        System.out.println("🎯 Receiver (signal.to): " + messageDto.getTo());
         chatService.callUser(messageDto,principal);
     }
 

@@ -11,6 +11,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.util.List;
 
 @Component
@@ -36,9 +37,14 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     String username = jwtService.extractUsername(jwtToken);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(username, null, List.of());
-                    System.out.println(authentication.getPrincipal());
+
+                    System.out.println("👤 Setting Principal: " + username);
+                    System.out.println("🔑 Connected user: " + authentication.getName());
 
                     accessor.setUser(authentication);
+                    System.out.println("🔐 WebSocket Principal set to: " + username);
+
+
                 } else {
                     throw new IllegalArgumentException("Invalid or expired token");
                 }

@@ -183,6 +183,7 @@ public class ChatService {
                 "/queue/signal",
                 new SignalMessageRequest("dummy@sender.com", "222@gmail.com", SignalType.CALL, null)
         );
+        System.out.println("📤 Sending to user: 222@gmail.com");
         System.out.println("📤 MESSAGE SEND TO 222@gmail.com// DUMMY3");
     }
 
