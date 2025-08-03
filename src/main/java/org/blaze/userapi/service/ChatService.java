@@ -177,15 +177,14 @@ public class ChatService {
     }
 
     @Scheduled(fixedDelay = 10000)
-    public void sendDummySignal3() {
-        messagingTemplate.convertAndSendToUser(
-                "222@gmail.com",
-                "/queue/signal",
+    public void sendDirectToQueue() {
+        messagingTemplate.convertAndSend(
+                "/user/222@gmail.com/queue/signal", // tam yolu kendin ver
                 new SignalMessageRequest("dummy@sender.com", "222@gmail.com", SignalType.CALL, null)
         );
-        System.out.println("📤 Sending to user: 222@gmail.com");
-        System.out.println("📤 MESSAGE SEND TO 222@gmail.com// DUMMY3");
+        System.out.println("🚨 Sent directly to /user/222@gmail.com/queue/signal");
     }
+
 
 
 

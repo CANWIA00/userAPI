@@ -41,7 +41,9 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     System.out.println("👤 Setting Principal: " + username);
                     System.out.println("🔑 Connected user: " + authentication.getName());
 
-                    accessor.setUser(authentication);
+                    accessor.setUser(() -> username);
+                    accessor.getSessionAttributes().put("user", username);
+
                     System.out.println("🔐 WebSocket Principal set to: " + username);
 
 
