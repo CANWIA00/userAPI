@@ -78,8 +78,10 @@ public class ChatController {
 
     @MessageMapping("/call")
     public void callUser(@Payload SignalMessageRequest messageDto, Principal principal) {
-        System.out.println("callUser: " + messageDto);
-       chatService.callUser(messageDto,principal);
+        log.info("🔒 Principal name: {}", principal.getName());
+        log.info("🎯 Message to: {}", messageDto.getTo());
+        chatService.callUser(messageDto,principal);
     }
+
 
 }

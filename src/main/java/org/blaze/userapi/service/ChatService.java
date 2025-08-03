@@ -8,11 +8,13 @@ import org.blaze.userapi.dto.request.SignalMessageRequest;
 import org.blaze.userapi.model.Message;
 import org.blaze.userapi.model.MessageType;
 import org.blaze.userapi.model.Profile;
+import org.blaze.userapi.model.SignalType;
 import org.blaze.userapi.repository.MessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -132,18 +134,59 @@ public class ChatService {
     }
 
     public void callUser(SignalMessageRequest message, Principal principal) {
+        System.out.println("📨 Received signal: " + message);
+
         if (!message.getFrom().equals(principal.getName())) {
             throw new SecurityException("Invalid sender");
         }
+
         try {
+            log.info("📤 Sending signal to user: {}, destination: /queue/signal, payload: {}",
+                    message.getTo(), message);
+
             messagingTemplate.convertAndSendToUser(
                     message.getTo(),
                     "/queue/signal",
                     message
             );
         } catch (Exception e) {
+            log.error("❌ Error while sending signal to user: {}", message.getTo(), e);
             throw new RuntimeException(e);
         }
     }
+    @Scheduled(fixedDelay = 10000)
+    public void sendDummySignal() {
+        SignalMessageRequest signal = new SignalMessageRequest(
+                "dummy@sender.com",
+                "222@gmail.com",
+                SignalType.CALL,
+                null
+        );
+        messagingTemplate.convertAndSendToUser(
+                "222@gmail.com",
+                "/queue/signal",
+                "Dummy CALL signal sent to 222@gmail.com"
+        );
+        System.out.println("📤 Dummy CALL signal sent to 222@gmail.com");
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void sendDummySignal2() {
+        messagingTemplate.convertAndSend("/topic/signalTest", "🔥 Hello frontend!");
+        System.out.println("📤 Dummy signal sent to /topic/signalTest");
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void sendDummySignal3() {
+        messagingTemplate.convertAndSendToUser(
+                "222@gmail.com",
+                "/queue/signal",
+                new SignalMessageRequest("dummy@sender.com", "222@gmail.com", SignalType.CALL, null)
+        );
+        System.out.println("📤 MESSAGE SEND TO 222@gmail.com// DUMMY3");
+    }
+
+
+
 
 }

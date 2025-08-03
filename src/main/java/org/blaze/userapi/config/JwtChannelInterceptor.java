@@ -36,6 +36,7 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     String username = jwtService.extractUsername(jwtToken);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(username, null, List.of());
+                    System.out.println(authentication.getPrincipal());
 
                     accessor.setUser(authentication);
                 } else {
